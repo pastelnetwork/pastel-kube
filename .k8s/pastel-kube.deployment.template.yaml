@@ -1,0 +1,191 @@
+# Role-based access control (RBAC)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pastel-pod-admin
+  namespace: default
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pastel-rbac
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: Role
+  name: pastel-pod-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netconfig
+  namespace: default
+  labels:
+    app: Pastel
+data:
+    # Pastel network type (mainnet, testnet or regtest)
+    network: ${network}
+    rpc_port: "${rpc-port}"
+    comm_port: "${comm-port}"
+    pastel_debug: "${pastel-debug}"
+    pastel_extra_params: "${pastel-extra-params}"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  cnode-miner
+  namespace: default
+  labels:
+    app: Pastel
+spec:
+  selector:
+    matchLabels:
+      app: Pastel
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  Pastel
+        nodeType: miner
+    spec:
+      volumes:
+      - name: chainparams-vol
+        hostPath:
+          path: '${host-volume-dir}/.pastel-params'
+          type: Directory
+      containers:
+      - name: cnode-container
+        image: ${miner-docker-image}
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: ${resources-limit-cpu}
+            memory: ${resources-limit-memory}
+        env:
+        - name: PASTEL_NETWORK
+          valueFrom:
+            configMapKeyRef:
+              name: netconfig
+              key: network
+        - name: PASTEL_NODE_TYPE
+          value: cnode-miner
+        - name: RPC_PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: rpc_port
+        - name: COMM_PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: comm_port
+        - name: PASTEL_DEBUG
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: pastel_debug
+        - name: PASTEL_EXTRA_PARAMS
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: pastel_extra_params
+        ports:
+        - containerPort: ${rpc-port}
+          name: rpc
+        - containerPort: ${comm-port}
+          name: comm 
+        volumeMounts:
+        - name: chainparams-vol
+          mountPath: /root/.pastel-params
+        livenessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  cnode
+  namespace: default
+  labels:
+    app: Pastel
+spec:
+  selector:
+    matchLabels:
+      app: Pastel
+  replicas: ${cnode-count}
+  template:
+    metadata:
+      labels:
+        app:  Pastel
+    spec:
+      volumes:
+      - name: chainparams-vol
+        hostPath:
+          path: '${host-volume-dir}/.pastel-params'
+          type: Directory
+      containers:
+      - name: cnode-container
+        image: ${cnode-docker-image}
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: ${resources-limit-cpu}
+            memory: ${resources-limit-memory}
+        env:
+        - name: PASTEL_NETWORK
+          valueFrom:
+            configMapKeyRef:
+              name: netconfig
+              key: network
+        - name: PASTEL_NODE_TYPE
+          value: cnode
+        - name: RPC_PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: rpc_port
+        - name: COMM_PORT
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: comm_port
+        - name: PASTEL_DEBUG
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: pastel_debug
+        - name: PASTEL_EXTRA_PARAMS
+          valueFrom: 
+            configMapKeyRef:
+              name: netconfig
+              key: pastel_extra_params
+        ports:
+        - containerPort: ${rpc-port}
+          name:  rpc
+        - containerPort: ${comm-port}
+          name: comm 
+        volumeMounts:
+        - name: chainparams-vol
+          mountPath: /root/.pastel-params
+        livenessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5

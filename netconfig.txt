@@ -1,0 +1,49 @@
+#######################################################
+# Copyright (c) 2022 The Pastel Core developers
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or https://www.opensource.org/licenses/mit-license.php.
+# 
+#  Configuration file for pastel-kube network setup
+#
+#######################################################
+# network type (mainnet, testnet or regtest)
+network=mainnet
+
+# Pastel data directory in the cnode pod
+# default directory /root/.pastel is not visible in Visual Studio Code kuberenetes extension
+pastel-data-dir="/pastel"
+
+# Pastel debug log categories:
+#   addrman, alert, bench, coindb, db, estimatefee, http, libevent, lock, mempool, net, partitioncheck, pow, proxy, prune,
+#   rand, reindex, rpc, selectcoins, tor, zmq, zrpc, zrpcunsafe (implies zrpc), compress
+pastel-debug=net,rpc,mempool
+
+# cnode memory resource limit
+resources-limit-memory=1500Mi
+# cnode cpu resource limit
+resources-limit-cpu=500m
+
+# Additional parameters that will be passed when starting Pastel cnode
+#pastel-extra-params="-txindex=1 -reindex"
+pastel-extra-params="-txindex=1"
+
+# number of cnodes to create
+cnode-count=3
+
+# rpc port for cnode pods
+rpc-port=12935
+
+# comm port for cnode pods
+comm-port=12930
+
+# rpc user
+rpc-user=pastel
+
+# rpc password
+rpc-password=vnet123
+
+# miner docker image
+miner-docker-image="pastel-cnode:latest"
+
+# cnode docker image
+cnode-docker-image="pastel-cnode:latest"

@@ -1,0 +1,75 @@
+##
+## pastel.conf configuration file. Lines beginning with # are comments.
+##
+
+#
+# JSON-RPC options (for controlling a running Zcash/pasteld process)
+#
+
+# server=1 tells pasteld to accept JSON-RPC commands (set as default if not specified)
+server=1
+
+# Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6.
+# This option can be specified multiple times (default: bind to all interfaces)
+#rpcbind=<addr>
+
+# rpcuser and rpcpassword to secure the JSON-RPC api
+rpcuser=${rpc-user}
+rpcpassword=${rpc-password}
+
+# How many seconds pastel will wait for a complete RPC HTTP request.
+# after the HTTP connection is established. 
+#rpcclienttimeout=30
+
+# By default, only RPC connections from localhost are allowed.
+# Specify as many rpcallowip= settings as you like to allow connections from other hosts,
+# either as a single IPv4/IPv6 or with a subnet specification.
+
+# NOTE: opening up the RPC port to hosts outside your local trusted network is NOT RECOMMENDED,
+# because the rpcpassword is transmitted over the network unencrypted and also because anyone 
+# that can authenticate on the RPC port can steal your keys + take over the account running pasteld
+
+#rpcallowip=10.1.1.34/255.255.255.0
+#rpcallowip=0.0.0.0/0
+#rpcallowip=2001:db8:85a3:0:0:8a2e:370:7334/96
+
+# Listen for RPC connections on this TCP port
+rpcport=${rpc-port}
+# chain communication port
+port=${comm-port}
+
+# Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect)
+dnsseed=0
+
+# Allow DNS lookups for -addnode, -seednode and -connect (default: 1)
+dns=0
+
+# Only connect to nodes in network <net> (ipv4, ipv6 or onion)
+# onlynet=ipv4
+
+# Miscellaneous options
+
+# Enable attempt to mine pastel.
+#gen=0
+
+# Set the number of threads to be used for mining pastel (-1 = all cores).
+#genproclimit=1
+
+# Network-related settings:
+
+# Use as many addnode= settings as you like to connect to specific peers
+#addnode=69.164.218.197
+#addnode=10.0.0.2:9933
+
+# Alternatively use as many connect= settings as you like to connect ONLY to specific peers
+#connect=69.164.218.197
+#connect=10.0.0.1:9933
+
+# Listening mode, enabled by default except when 'connect' is being used
+listen=1
+listenonion=0
+
+# Maximum number of inbound+outbound connections.
+#maxconnections=
+
+showmetrics=0

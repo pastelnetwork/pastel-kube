@@ -1,0 +1,7 @@
+.docker/Dockerfile.cnode
+.docker/cnode/pasteld
+.docker/cnode/pastel-cli
+.docker/cnode/pastel.conf
+.k8s/pastel-kube.deployment.yaml
+.pastel-params/chain*
+.pastel-params/*.params

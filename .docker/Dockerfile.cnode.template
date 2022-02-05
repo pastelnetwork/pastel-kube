@@ -1,0 +1,13 @@
+FROM ubuntu:21.04
+LABEL app=Pastel type=cnode version=1.0
+ENV PASTELDIR=${pastel-data-dir}
+WORKDIR ${PASTELDIR}
+COPY cnode/* ./
+RUN apt update && \
+  apt install -y libgomp1 curl jq && \
+  rm -rf /var/lib/apt/lists/* && \
+  chmod a+x \
+    ${PASTELDIR}/pasteld \
+    ${PASTELDIR}/pastel-cli \
+    ${PASTELDIR}/*.sh
+ENTRYPOINT ${PASTELDIR}/start-node.sh
